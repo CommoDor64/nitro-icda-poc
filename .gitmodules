@@ -1,0 +1,12 @@
+[submodule "nitro-icda"]
+    path = nitro-icda
+    url = https://github.com/CommoDor64/nitro-icda.git
+
+[submodule "icda"]
+    path = icda
+    url = https://github.com/CommoDor64/icda.git
+
+[submodule "icdaserver"]
+    path = icdaserver
+    url = https://github.com/CommoDor64/icdaserver.git
+
