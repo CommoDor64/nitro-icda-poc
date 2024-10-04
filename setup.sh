@@ -30,13 +30,4 @@ echo "Navigating to icda and installing npm dependencies..."
 cd icda
 npm install
 
-echo "Starting DFX with a clean slate..."
-dfx start --clean &
-
-echo "Deploying the application..."
-dfx deploy
-
-echo "Restarting DFX..."
-dfx stop && dfx start
-
 echo "Installation and setup complete!"
