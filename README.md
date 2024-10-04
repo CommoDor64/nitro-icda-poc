@@ -2,6 +2,7 @@
 
 *DISCLAIMER*: this repo shouln't ever, ever be assumed safe for production or even proper staging/testing environment. Use locally only.
 
+*NOTE*: ALL STEPS ARE CRUCIAL
 ## Setup
 - `cd nitro-icda-poc`
 - `chmod +x ./setup.sh`
