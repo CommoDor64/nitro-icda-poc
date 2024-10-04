@@ -24,6 +24,7 @@ source "$HOME/.local/share/dfx/env"
 
 echo "Installing Foundry..."
 curl -L https://foundry.paradigm.xyz | bash
+foundryup
 source /root/.bashrc
 
 echo "Navigating to icda and installing npm dependencies..."
