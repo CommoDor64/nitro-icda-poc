@@ -2,7 +2,9 @@
 
 *DISCLAIMER*: this repo shouln't ever, ever be assumed safe for production or even proper staging/testing environment. Use locally only.
 
-*NOTE*: ALL STEPS ARE CRUCIAL
+*NOTE 1*: ALL STEPS ARE CRUCIAL
+*NOTE 2*: TESTED ONLY ON UBUNTU 22.04 on Hetzner servers with intel processor and 8C/16GB. If you have a similar setup (on Hetzner) consider to take a VM not located in europe. Hetzner proxies mess up the setup for some reason.
+
 ### Setup
 - `cd nitro-icda-poc`
 - `chmod +x ./setup.sh`
@@ -26,7 +28,7 @@ might be block since `icdaserver` is running
 2. `export NITRO_CONTRACTS_BRANCH=3fd3313`
 3. Run `cat ../../keyset.json | jq .keyset.backends[0].pubkey` to get the serialized root key
 4. Change the value in the field `pubkey` to the value printed in the last step in the following file and line
-https://github.com/CommoDor64/nitro-testnode/blob/2091188d1ac4132efe9e8a8f89cac970a62071e6/scripts/config.ts#L178
+https://github.com/CommoDor64/nitro-testnode/blob/2091188d1ac4132efe9e8a8f89cac970a62071e6/scripts/config.ts#L178. 
 5. `./test-node.bash --dev --init`
 
 ### Post Config (After Arbitrum Nitro is running and you can see sequencer output)
