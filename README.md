@@ -6,6 +6,7 @@
 *NOTE 2*: TESTED ONLY ON UBUNTU 22.04 on Hetzner servers with intel processor and 8C/16GB. If you have a similar setup (on Hetzner) consider to take a VM not located in europe. Hetzner proxies mess up the setup for some reason.
 
 ### Setup
+- `git clone --recurse-submodules https://github.com/CommoDor64/nitro-icda-poc.git`
 - `cd nitro-icda-poc`
 - `chmod +x ./setup.sh`
 - `./setup.sh`
@@ -66,7 +67,8 @@ https://github.com/CommoDor64/nitro-icda/compare/77cd88d5..a04016d7
 https://github.com/CommoDor64/nitro-icda/compare/77cd88d5..a04016d7#diff-45e3945280328599b608711c381252e1a71b8e2f8e06e740246288799b6dbf51R222   
 2. `das/aggregator.go` - changes to `Store` function. In the past each reply from each DAServer was verified, and then an aggregated signature was verified against the aggregated pubkeys. Now there is no need for that, this verification is the responsibility of the collection of signatures at the subnet level or a bit of it done in the IC agent library.
 https://github.com/CommoDor64/nitro-icda/compare/77cd88d5..a04016d7#diff-d5c9f8115ac4cd287f2ecf9bcb3504da5d078449f40cce9af74d7dd8344621c6R331
-4. BLS verification was done by the ethereum implementation library. This was not compatible with the one used in core IC. The root key from the network is encoded as a compressed one, while the ethereum implementation uses the uncompressed one. Conversion is possible, but considering the scope and time management, I couldn't get it to work after some time and decided to move on and replace the one from the sequencer side in-place.
+3. BLS verification was done by the ethereum implementation library. This was not compatible with the one used in core IC. The root key from the network is encoded as a compressed one, while the ethereum implementation uses the uncompressed one. Conversion is possible, but considering the scope and time management, I couldn't get it to work after some time and decided to move on and replace the one from the sequencer side in-place.
+`VerifyDataFromIC` is defined here https://github.com/CommoDor64/nitro-icda/compare/77cd88d5..a04016d7#diff-1b01f2f1b6d746e515fdc8b9cda5b3a4f1eda49f7202e8fc73c735998d3c61f0R23. At the moment (07.10.2024) it has couple of cuplicated to be cleaned ASAP
 
 ### Misc Changes:
 1. The structure of the project is very typical to go, using interfaces heavily. However some things are not abstracted and needed to be changed to fit. For example the publc key and signature types used are of a specific type provided by Ethereum's BLS library. Places in code that used this type are mostly swapped with a raw byte array/slice in order to accomedate the signature/rootkey provided by IC.
