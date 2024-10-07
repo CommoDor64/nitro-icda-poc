@@ -24,13 +24,13 @@ It's an interactive shell, approve everything once promted
 A `nitro-icda-poc/keyset.json` is generated and will be used in the next step. The terminal
 might be block since `icdaserver` is running
 
-### Run nitro
+### Run Arbitrum Nitro
 1. `cd nitro-icda/nitro-test`
 2. `export NITRO_CONTRACTS_BRANCH=3fd3313`
 3. Run `cat ../../keyset.json | jq .keyset.backends[0].pubkey` to get the serialized root key
 4. Change the value in the field `pubkey` to the value printed in the last step in the following file and line
 https://github.com/CommoDor64/nitro-testnode/blob/2091188d1ac4132efe9e8a8f89cac970a62071e6/scripts/config.ts#L178. 
-5. `./test-node.bash --dev --init`
+5. `./test-node.bash --dev --init` *It will build Arbitrum Nitro for the first time and might take up to 15 minutes*
 
 ### Post Config (After Arbitrum Nitro is running and you can see sequencer output)
 Once the nitro instance is up, and complaining about some error, do:
@@ -45,10 +45,55 @@ In this stage, you should have a working setup of all components:
 1. Local IC instance with deployed contracts
 2. Local Arbitrum + L1 instance with proper config
 3. A DA server called icdaserver, acting as a proxy between IC and Arbitrum
+### TODO what happens when runs what when fails
 
 ### Play with it
 1. `cd nitro-icda/nitro-test`
 2. `docker compose run scripts send-l2 --ethamount 1 --to l2owner --wait` sends 1 ETH between two accounts. The transaction should find itself in a l2 block and eventually posted to the DA layer. Looking at the output from the terminals should show you that the operation is happening correctly
+
+*Expected logs from Arbitrum:*
+```bash
+sequencer-1      | INFO [10-07|08:51:18.308] Submitted transaction                    hash=0x96db74642288e08e8abe693b52dddd20e3db747be842c60b730985ce6b03fa20 from=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E nonce=3 recipient=0x5E1497dD1f08C87b2d8FE23e9AAB6c1De833D927 value=1,000,000,000,000,000,000
+poster-1         | INFO [10-07|08:51:20.140] created block                            l2Block=21 l2BlockHash=5a0e0e..817b8b
+sequencer-1      | INFO [10-07|08:51:21.661] DataPoster sent transaction              nonce=3 hash=7dddc3..a5d766 feeCap=15,000,000,070 tipCap=1,500,000,000 blobFeeCap=<nil> gas=213,512
+sequencer-1      | INFO [10-07|08:51:21.663] BatchPoster: batch sent                  sequenceNumber=4 from=20 to=22 prevDelayed=12 currentDelayed=13 totalSegments=4  numBlobs=0
+staker-unsafe-1  | http://172.17.0.1:8080/get-by-hash/0xccdd09d5967e4d9bacdf8e1909aa8b05a10ec2c458d381cbd992f4045e3963af
+sequencer-1      | http://172.17.0.1:8080/get-by-hash/0xccdd09d5967e4d9bacdf8e1909aa8b05a10ec2c458d381cbd992f4045e3963af
+poster-1         | http://172.17.0.1:8080/get-by-hash/0xccdd09d5967e4d9bacdf8e1909aa8b05a10ec2c458d381cbd992f4045e3963af
+staker-unsafe-1  | INFO [10-07|08:51:23.037] InboxTracker                             sequencerBatchCount=5 messageCount=22 l1Block=166,015 l1Timestamp=2024-10-07T08:51:18+0000
+sequencer-1      | INFO [10-07|08:51:23.041] InboxTracker                             sequencerBatchCount=5 messageCount=22 l1Block=166,015 l1Timestamp=2024-10-07T08:51:18+0000
+poster-1         | INFO [10-07|08:51:23.041] InboxTracker                             sequencerBatchCount=5 messageCount=22 l1Block=166,015 l1Timestamp=2024-10-07T08:51:18+0000
+staker-unsafe-1  | INFO [10-07|08:51:23.046] created block                            l2Block=20 l2BlockHash=5a8156..9a3601
+staker-unsafe-1  | INFO [10-07|08:51:24.045] Pruned message results:                  "first pruned key"=15 "last pruned key"=16
+staker-unsafe-1  | INFO [10-07|08:51:24.046] created block                            l2Block=21 l2BlockHash=5a0e0e..817b8b
+staker-unsafe-1  | INFO [10-07|08:51:24.046] Pruned expected block hashes:            "first pruned key"=15 "last pruned key"=16
+staker-unsafe-1  | INFO [10-07|08:51:24.048] Pruned last batch messages:              "first pruned key"=15 "last pruned key"=16
+staker-unsafe-1  | INFO [10-07|08:51:24.049] Pruned last batch delayed messages:      "first pruned key"=9  "last pruned key"=9
+staker-unsafe-1  | INFO [10-07|08:51:25.743] creating node                            hash=d1f528..7ad158 lastNode=2 parentNode=2
+staker-unsafe-1  | INFO [10-07|08:51:25.778] DataPoster sent transaction              nonce=5 hash=b33a7a..ab2bf2 feeCap=15,000,000,070 tipCap=1,500,000,000 blobFeeCap=<nil> gas=367,361
+staker-unsafe-1  | INFO [10-07|08:51:27.006] successfully executed staker transaction hash=b33a7a..ab2bf2
+sequencer-1      | INFO [10-07|08:51:33.051] Submitted transaction                    hash=0xbe08b8eeb31cec9dab16fb1ba648ce1d1fa9b4d21c90e97a13af3132106ba697 from=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E nonce=4 recipient=0x5E1497dD1f08C87b2d8FE23e9AAB6c1De833D927 value=1,000,000,000,000,000,000
+sequencer-1      | INFO [10-07|08:51:35.075] Submitted transaction                    hash=0xdc25925b96db1c111b3fefe5f14b051030b0e8130074f5266cb588af586faa63 from=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E nonce=5 recipient=0x5E1497dD1f08C87b2d8FE23e9AAB6c1De833D927 value=1,000,000,000,000,000,000
+poster-1         | INFO [10-07|08:51:35.148] created block                            l2Block=22 l2BlockHash=3ab71b..1f1762
+poster-1         | INFO [10-07|08:51:36.148] created block                            l2Block=23 l2BlockHash=ee9f7b..a241c4
+sequencer-1      | INFO [10-07|08:51:43.012] ExecutionEngine: Added DelayedMessages   pos=24 delayed=13 block-header="&{ParentHash:0xee9f7b0eaaf32f96fd80c29b6433c2a25ce0ebba745904f227f7b04dbba241c4 UncleHash:0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347 Coinbase:0xe2148eE53c0755215Df69b2616E552154EdC584f Root:0xab2366488ebca367c0ff06e976bba9a2d55caec527f03b59ae3e90537ee0c5dd TxHash:0xa5f9155875493bd0a548ee4f35555cbdcfcbc1a1fd10e71482e8bae4864794e7 ReceiptHash:0xf08cf5553e1dae52e3df19b356b8320e17c39fb055f635739c31052db5c3e45e Bloom:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] Difficulty:+1 Number:+24 GasLimit:1125899906842624 GasUsed:0 Time:1728291095 Extra:[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] MixDigest:0x0000000000000000000000000002888b000000000000001e0000000000000000 Nonce:[0 0 0 0 0 0 0 14] BaseFee:+100000000 WithdrawalsHash:<nil> BlobGasUsed:<nil> ExcessBlobGas:<nil> ParentBeaconRoot:<nil>}"
+```
+
+### Break it
+A strong verification for the fact that block data is saved on and validated from the IC can be done by providing a faulty public key upon the initialization of Arbitrum.
+
+On step 4 you have initialized Arbitrum Nitro with the correct public key:
+  > Change the value in the field `pubkey` to the value printed in the last step in the following file and line
+  > https://github.com/CommoDor64/nitro-testnode/blob/2091188d1ac4132efe9e8a8f89cac970a62071e6/scripts/config.ts#L178.
+
+The base64 encoded faulty key can be for instance :`MIGCMB0GDSsGAQQBgtx8BQMBAgEGDCsGAQQBgtx8BQMCAQNhAJcsz6sQicY/V7hUM/7Up43ok3c+aPAu2BSOJUVVZF4qqj6bUdndAb8PBSTxx5wNXBL0S2fK5vBJFc/9pKncc3fr0TfTKUvb0fcZ/NeztDR32/hgNdfty7ezZR8aCt6/OA==`. Try that out by replacing it in the same file.
+Remember to restart Arbitrum Afterwards
+1. `cd nitro-icda/nitro-test`
+2. `ctrl+cmd` to kill the Arbitrum Nitro process
+3. `docker compose down` to remove hanging containers
+4. `./test-node.bash --dev --init`
+
+*It will build Arbitrum Nitro again which might take couple of minutes*
 
 ## Detailed Changelog
 This repo contains 3 sub modules.
