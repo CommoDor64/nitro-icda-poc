@@ -9,10 +9,11 @@
 1. Have `docker` installed
 2. Install minimal deps `apt update && apt install -y make jq`
 
-## Run
+## Run and Rerun
 1. Clone this repo (might take couple of minutes) `git clone --recurse-submodules https://github.com/CommoDor64/nitro-icda-poc.git`
 2. `cd nitro-icda-poc`
-3. Start the entire setup (icda, icdaserver and the arbitrum setup) `make all`
+3. `make clean` should clean the old setup in case you have it running
+4. Start the entire setup (icda, icdaserver and the arbitrum setup) `make all`
 
 ## Play with it
 1. The following rule sends 1 ETH between addresses and triggers Arbitrum block creation `make tx`
