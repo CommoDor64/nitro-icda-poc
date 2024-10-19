@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+.ONESHELL:
 .EXPORT_ALL_VARIABLES:
 .PHONY: all icda icdaserver icdadeploy run clean nitroicda
 
@@ -9,6 +10,11 @@ clean:
 	rmdir generated || true && \
 	cd nitro-icda/nitro-testnode && docker compose down && \
 	docker container prune --force
+setup:
+	apt update
+	apt install jq
+	curl -L https://foundry.paradigm.xyz | bash
+	/root/.foundry/bin/foundryup
 
 icda:
 	cd icda && \
@@ -35,12 +41,16 @@ nitroicda:
 	./test-node.bash --dev --init --detach
 
 postsetup-nitroicda:
-	docker run -v $(shell pwd)/generated/keyset.json:/data/keyset/keyset-info.json --entrypoint /bin/sh nitro-node-dev-testnode -c \
-	"mkdir -p /data/keyset && datool dumpkeyset --conf.file /data/keyset/keyset-info.json" | \
-	grep 0x000 | \
-	sed 's/Keyset: //g' | \
-	xargs -I {} cast send --rpc-url http://localhost:8545 --private-key 0xdc04c5399f82306ec4b4d654a342f40e2e0620fe39950d967e1e574b32d4dd36 '0x18d19C5d3E685f5be5b9C86E097f0E439285D216' "setValidKeyset(bytes)" {}
-
+	@keyset_value=$$(docker run -v $$(pwd)/generated/keyset.json:/data/keyset/keyset-info.json \
+		--entrypoint /bin/sh nitro-node-dev-testnode -c \
+		"mkdir -p /data/keyset && datool dumpkeyset --conf.file /data/keyset/keyset-info.json" | \
+		grep 0x000 | sed 's/Keyset: //g'); \
+	docker run --network host ghcr.io/foundry-rs/foundry:latest "cast send \
+		--rpc-url http://localhost:8545 \
+		--private-key 0xdc04c5399f82306ec4b4d654a342f40e2e0620fe39950d967e1e574b32d4dd36 \
+		'0x18d19C5d3E685f5be5b9C86E097f0E439285D216' \
+		'setValidKeyset(bytes)' \
+		$$keyset_value"
 tx:
 	cd nitro-icda/nitro-testnode && docker compose run scripts send-l2 --ethamount 1 --to l2owner --wait
 
