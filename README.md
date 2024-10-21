@@ -5,6 +5,14 @@
 *NOTE 1*: ALL STEPS ARE CRUCIAL
 *NOTE 2*: TESTED ONLY ON UBUNTU 22.04 on Hetzner servers with intel processor and 8C/16GB. If you have a similar setup (on Hetzner) consider to take a VM not located in europe. Hetzner proxies mess up the setup for some reason.
 
+## What's included
+
+1. A local (test) instance of the Internet Computer, with a smart contract that accepts Arbitrum blocks from a sequencer. This runs as the `icda` Docker container and effectively serves as the data availability committee.
+1. A modified DA server component of Arbitrum, which forwards the requests to the `icda` container. This is the `icdaserver` component.
+1. An Arbitrum testnet, together with a sequencer that has been modified to check slightly more complicated BLS signatures issued by Internet Computer smart contracts (in particular, signatures of Merkle trees with a certain structure).
+1. Scripts which tie these together, passing the threshold BLS key of the Internet Computer test instance (`icda`) to the other components
+1. Scripts that demonstrate submitting transactions.
+
 ## Dependencies
 1. Have `docker` installed
 2. Install minimal deps `apt update && apt install -y make jq`
@@ -16,9 +24,20 @@
 4. Start the entire setup (icda, icdaserver and the arbitrum setup) `make all`
 
 ## Play with it
-1. The following rule sends 1 ETH between addresses and triggers Arbitrum block creation `make tx`
 
-### Expected logs from Arbitrum:
+1. Run `docker logs nitro-testnode-sequencer-1` to watch the output of the Arbitrum sequencer
+1. In a separate terminal, execute the following rule (from the `nitro-icda-poc` directory) which sends 1 ETH between addresses and triggers an Arbitrum block creation: `make tx`. See the expected happy path output below.
+1. Modify the setup to delete and redeploy the Internet Computer test instance. This will change the threshold BLS key of the instance, and provoke signature verification errors on the sequencer.
+    ```bash
+    $ docker exec -it icda /bin/bash
+    /icda# dfx stop
+    # Here you need to wait for a minute or so until the TCP TIME_WAIT passes
+    /icda# dfx start --clean --background
+    /icda# dfx deploy icda_backend
+    ```
+    Now try `make tx` from a separate terminal again. See the failure path output below.
+
+### Expected logs from Arbitrum (happy path)
 Running `docker logs nitro-testnode-sequencer-1` should report no errors and look like the following log print:
 
 ```bash
@@ -50,6 +69,16 @@ sequencer-1      | INFO [10-07|08:51:43.012] ExecutionEngine: Added DelayedMessa
 Despite `docker logs nitro-testnode-sequencer-1` being the most important log, the following ones can give valueable information
 1. `docker logs icda`
 2. `docker logs icdaserver`
+
+### Expected logs from Arbitrum (failure path)
+
+This is the expected output of `docker logs nitro-testnode-sequencer-1` after the Internet Computer test instance is redeployed.
+
+```
+INFO [10-21|13:42:28.624] Submitted transaction                    hash=0x2fba5691ad84abb085f36f30bc19b574063a28fcc2133f01f84cad7a73309077 from=0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E nonce=2 reci
+pient=0x5E1497dD1f08C87b2d8FE23e9AAB6c1De833D927 value=1,000,000,000,000,000,000                                                                                                                       
+WARN [10-21|13:42:36.575] error posting batch                      err="signature verification failed"
+```
 
 ## Detailed Changelog
 This repo contains 3 sub modules.
