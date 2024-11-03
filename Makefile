@@ -28,7 +28,14 @@ icdadeploy:
 icdaserver:
 	cd icdaserver && \
 	docker build -t icdaserver . && \
-	docker run -d -v $(shell pwd)/generated/:/generated/ --name=icdaserver --network=host icdaserver
+	docker run -d -v \
+		$(shell pwd)/generated/:/generated/ \
+		--name=icdaserver \
+		--network=host \
+		-e DAS_NETWORK="http://127.0.0.1:4943/" \
+  		-e DAS_CANISTER="bkyz2-fmaaa-aaaaa-qaaaq-cai" \
+  		-e DAS_KEYSET_HASH="0xb2fd804a20ccbfcfcb4053db7349d066b5ce00b01a48128754d4131fd5aeb741" \
+		icdaserver
 
 setup-nitroicda:
 	sleep 5
